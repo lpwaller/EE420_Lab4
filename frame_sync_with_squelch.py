@@ -11,7 +11,7 @@ import numpy
 
 
 class frame_sync(gr.basic_block):
-    def __init__(self, receiving_flag):
+    def __init__(self, rx_status, tx_status):
         gr.basic_block.__init__(self, name="frame_sync",
             in_sig=[numpy.uint8, numpy.float32],
             out_sig=[numpy.uint8])
@@ -26,6 +26,8 @@ class frame_sync(gr.basic_block):
         self.barker13post = [-1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, -1]
         self.min_msg_len = 8*min_num_chars + 13 + 13 # min pkt length including pre and post (bits)
         self.max_msg_len = 8*max_num_chars + 13# max pkt payload plus post barker length (bits)
+        self.rx_pkt_timeout = 5000 # timeout between RTS and packet
+
 
     def general_work(self, input_items, output_items):
         in0 = input_items[0]
@@ -41,6 +43,9 @@ class frame_sync(gr.basic_block):
 
         threshold = 11
         self.consume(1, int(len(in1)/2))
+
+        if rx_status[0] = 1
+            rx_pkt_timeout += 1
 
         if(ninput_items > self.min_msg_len): #if buffer is long enough
             in0_short = in0[0:ninput_items- self.min_msg_len]
@@ -65,6 +70,14 @@ class frame_sync(gr.basic_block):
                     pkt_len = np.argmax(barkerpostcheck)
 
                     #check if it is a valid length (multiple of 8)
+                    if rx_status[0] == 0:
+                        if pkt_len == 8 and sum(in0[start+ndx]) == 0:
+                            rx_status[0] == 1
+                            self.rx_pkt_timeout = 0
+                        self.consume(0,int(start) + int(pkt_len)+12) #consume the bad pkt to the end of the post barker
+                        return 0 # dont push anything
+
+                    # rx_status = 1
                     if np.mod(pkt_len,8) == 0: #Yay its a legit packet. pass it on.
                         for ndx in range(pkt_len):
                             out[ndx] = in0[start+ndx]
