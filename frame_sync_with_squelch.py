@@ -43,8 +43,9 @@ class frame_sync(gr.basic_block):
 
         threshold = 11
         self.consume(1, int(len(in1)/2))
-
-
+        if tx_status[3] > 0:
+            self.consume(0, int(len(in0)/2))
+            self.consume(1, int(len(in1)/2))
         if rx_status[0] = 1
             rx_pkt_timeout += 1
 
