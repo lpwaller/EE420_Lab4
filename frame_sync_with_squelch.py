@@ -7,6 +7,8 @@ import numpy
 import matplotlib.pyplot as plt
 import string_to_list
 import time
+import numpy
+
 
 class frame_sync(gr.basic_block):
     def __init__(self, receiving_flag):
