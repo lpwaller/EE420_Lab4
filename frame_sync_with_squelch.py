@@ -31,6 +31,7 @@ class frame_sync(gr.basic_block):
         in0 = input_items[0]
         in1 = input_items[1]
         out = output_items[0]
+        this = 0
 
         ninput_items = len(in0)
         if max(in1) < 0.5:
