@@ -31,7 +31,7 @@ class frame_sync(gr.basic_block):
         in0 = input_items[0]
         in1 = input_items[1]
         out = output_items[0]
-        this = 0
+
 
         ninput_items = len(in0)
         if max(in1) < 0.5:
@@ -41,7 +41,7 @@ class frame_sync(gr.basic_block):
 
         threshold = 11
         self.consume(1, int(len(in1)/2))
-
+        if(tx)
         if(ninput_items > self.min_msg_len): #if buffer is long enough
             in0_short = in0[0:ninput_items- self.min_msg_len]
             new_array = in0_short.astype(numpy.int32) * 2 - 1

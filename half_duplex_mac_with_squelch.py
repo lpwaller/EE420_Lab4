@@ -105,7 +105,7 @@ class transmit_path(gr.hier_block2):
         self.pkt_input.msgq().insert_tail(msg)
 
 class receive_path(gr.hier_block2):
-    def __init__(self, rx_callback, receiving_flag):
+    def __init__(self, rx_callback, tx_status, rx_status):
         gr.hier_block2.__init__(self, "receive_path",
             gr.io_signature(1, 1, gr.sizeof_gr_complex),
             gr.io_signature(0, 0, 0))
@@ -128,7 +128,7 @@ class receive_path(gr.hier_block2):
         	verbose=False,
         	log=False,
         )
-        self.frame_sync = frame_sync(receiving_flag) # Your custom block!!!
+        self.frame_sync = frame_sync(tx_status, rx_status) # Your custom block!!!
 
         self.output_unpacked_to_packed = blocks.unpacked_to_packed_bb(1, gr.GR_MSB_FIRST)
 
@@ -178,6 +178,9 @@ class tdd_mac(object):
         # need it to be two chars because it is length 13 and two chars is 16. prepend three 0s and
         # split into two bytes: [00000000] = 0 and [11001010] =  2+8+64+128 = 202
         self.barker13pre = chr(0) + chr(202)
+        self.rts = chr(0)
+        self.cts = chr(1)
+        self.ack = chr(2)
 
         # barkerpost =  [0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]
         # similar process, but 3 extra 0s go on the end now. [01010011] = 1+2+16+64 = 83 , [00000000]
@@ -198,7 +201,7 @@ class tdd_mac(object):
         # Stuff goes here like:
         print("Breaking News: " + payload)
 
-    def main_loop(self, receiving_flag):
+    def main_loop(self, tx_status):
         print("\n\nType away boss. Send \"exit\" to stop\n")
         user_msg = raw_input()
         fill_frame = ""
@@ -217,12 +220,19 @@ class tdd_mac(object):
                 time.sleep(0.001)
                 ctr += 1
             time.sleep(0.1)
-            self.tb.send_pkt(full_msg)
+            tx_status[0] = 1
+            if tx_status[2] == 1000:
+                tx_status[3] = numpy.random.exponential(1))
+            elif tx_status[1] == 1:
+                self.tb.send_pkt(full_msg)
+                tx_status[5] = 1
+
             # The receiver thread automatically handles receiving
 
 
 def main():
-    receiving_flag = [0,0]
+    rx_status = [0,0,0]
+    tx_status = [0,0,0,0,0,0] #0: Packet Ready, 1: Channel Ready, 2: Backoff Needed, 3: Backoff time, 4: Send Packet, 5: Recieved ACK
 
     parser = OptionParser(option_class=eng_option, conflict_handler="resolve")
     parser.add_option("-f", "--freq", type="eng_float", default=None,
@@ -245,13 +255,13 @@ def main():
 
     mac = tdd_mac()
 
-    tb = my_top_block(mac.rx_callback, freq, receiving_flag)
+    tb = my_top_block(mac.rx_callback, freq, tx_status, rx_status)
 
     mac.set_top_block(tb)
 
     tb.start() # Start executing the flow graph (runs in separate threads)
 
-    mac.main_loop(receiving_flag) # don't expect this to return
+    mac.main_loop(tx_status, rx_status) # don't expect this to return
 
     tb.stop() # but if it does, tell flow graph to stop.
     tb.wait() # wait for it to finish
