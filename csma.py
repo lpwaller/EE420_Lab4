@@ -211,6 +211,13 @@ class tdd_mac(object):
             fill_frame = fill_frame + chr(0)
         full_msg = self.empty_frame+self.empty_frame+self.barker13pre+user_msg+self.barker13post+fill_frame
 
+        ##spam channel initially
+        print("Occupying Channel with Garbage")
+        for spam_it in range(5000):
+            self.tb.send_pkt(user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg)
+            time.sleep(0.001)
+
+        print("Done Occupying Channel, Entering Main Loop")
 
         while 1:
             ##################################################
