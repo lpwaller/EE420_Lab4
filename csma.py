@@ -206,16 +206,16 @@ class tdd_mac(object):
     def main_loop(self, tx_status, rx_status):
         print("\n\nType something to send: ")
         user_msg = raw_input()
-        user_msg = user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg
+        user_msg = user_msg+user_msg+user_msg
         fill_frame = ""
         for ndx in range((len(user_msg)+4),self.empty_frame_size):
             fill_frame = fill_frame + chr(0)
         full_msg = self.empty_frame+self.empty_frame+self.barker13pre+user_msg+self.barker13post+fill_frame
 
         ##spam channel initially
-        print("Occupying Channel with Garbage")
-        for spam_it in range(5000):
-            self.tb.send_pkt(user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg)
+        #print("Occupying Channel with Garbage")
+        #for spam_it in range(5000):
+            #self.tb.send_pkt(user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg)
             #time.sleep(0.001) #no sleep, just spam
 
         print("Done Occupying Channel, Entering Main Loop")
@@ -227,6 +227,7 @@ class tdd_mac(object):
             # Default send frame size is 1472 (maybe. I'm not sure. ref: http://lists.ettus.com/pipermail/usrp-users_lists.ettus.com/2011-April/001040.html
             if rx_status[1] == 1:
                 self.tb.send_pkt(self.ack_msg)
+                rx_status[1] = 0
 
             #ack received. Reset
             if tx_status[5] == 1:
@@ -246,7 +247,7 @@ class tdd_mac(object):
             elif tx_status[1] == 0:
                 print("Initiating Spectral Scan")
                 tx_status[1] = 1
-                tx_status[2] = 4000
+                tx_status[2] = 5000
 
             #channel ready
             elif tx_status[2] == 0:
@@ -255,7 +256,7 @@ class tdd_mac(object):
                     print("Sending Packet")
                     self.tb.send_pkt(full_msg)
                     #start timeout for packet drop
-                    tx_status[4] = 2000
+                    tx_status[4] = 5000
                     print("Awaiting ack")
                 else: # awaiting ack
                     tx_status[4] += -1

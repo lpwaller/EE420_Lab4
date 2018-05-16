@@ -46,7 +46,7 @@ class frame_sync(gr.basic_block):
 
 
         threshold = 11
-        spectrum_sense_threshold = 0.2
+        spectrum_sense_threshold = 0.5
 
 #####################################################################
 ### Transmit Status Stuff ( Spectrum Sense, Backoff Implementation)
