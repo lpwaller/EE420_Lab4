@@ -7,11 +7,11 @@ import numpy
 import matplotlib.pyplot as plt
 import string_to_list
 import time
-import numpy
+from numpy.random import exponential
 
 
 class frame_sync(gr.basic_block):
-    def __init__(self, rx_status, tx_status):
+    def __init__(self, tx_status, rx_status):
         gr.basic_block.__init__(self, name="frame_sync",
             in_sig=[numpy.uint8, numpy.float32],
             out_sig=[numpy.uint8])
@@ -21,6 +21,7 @@ class frame_sync(gr.basic_block):
         ##################################################
         min_num_chars = 1
         max_num_chars = 32
+        self.debug = True
 
         self.barker13pre = [-1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1]
         self.barker13post = [-1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, -1]

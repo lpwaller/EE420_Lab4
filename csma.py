@@ -8,7 +8,7 @@ import gnuradio.gr.gr_threading as _threading
 from optparse import OptionParser
 from gnuradio import eng_notation
 from gnuradio.eng_option import eng_option
-from frame_sync_with_squelch import frame_sync
+from frame_sync_csma import frame_sync
 import time
 import sys
 from numpy.random import exponential
