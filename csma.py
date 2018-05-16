@@ -215,7 +215,7 @@ class tdd_mac(object):
         print("Occupying Channel with Garbage")
         for spam_it in range(5000):
             self.tb.send_pkt(user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg)
-            time.sleep(0.001)
+            #time.sleep(0.001) #no sleep, just spam
 
         print("Done Occupying Channel, Entering Main Loop")
 
@@ -245,7 +245,7 @@ class tdd_mac(object):
             elif tx_status[1] == 0:
                 print("Initiating Spectral Scan")
                 tx_status[1] = 1
-                tx_status[2] = 2000
+                tx_status[2] = 4000
 
             #channel ready
             elif tx_status[2] == 0:

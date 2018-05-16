@@ -21,7 +21,6 @@ class frame_sync(gr.basic_block):
         ##################################################
         min_num_chars = 1
         max_num_chars = 32
-        self.debug = True
 
         self.barker13pre = [-1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1]
         self.barker13post = [-1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, -1]
@@ -32,12 +31,17 @@ class frame_sync(gr.basic_block):
         self.tx_status = tx_status
         self.tx_check = False
         self.ack_check = False
+        self.debug_ctr = 0
 
 
     def general_work(self, input_items, output_items):
         in0 = input_items[0]
         in1 = input_items[1]
         out = output_items[0]
+        self.debug_ctr = self.debug_ctr + 1
+        if self.debug_ctr > 1000:
+            #print(self.tx_status)
+            self.debug_ctr = 0
 
 
 
@@ -46,7 +50,7 @@ class frame_sync(gr.basic_block):
 #####################################################################
 ### Transmit Status Stuff ( Spectrum Sense, Backoff Implementation)
         if self.tx_status[3] > 0:
-            self.tx_status[3] += -0.001
+            self.tx_status[3] += -1
             time.sleep(0.001)
         elif self.tx_status[1] == 1:
             if self.tx_status[2] > 0:
