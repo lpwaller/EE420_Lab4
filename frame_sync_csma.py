@@ -20,7 +20,7 @@ class frame_sync(gr.basic_block):
         # Put Variables Here
         ##################################################
         min_num_chars = 1
-        max_num_chars = 32
+        max_num_chars = 320
 
         self.barker13pre = [-1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1]
         self.barker13post = [-1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, -1]
@@ -38,14 +38,12 @@ class frame_sync(gr.basic_block):
         in0 = input_items[0]
         in1 = input_items[1]
         out = output_items[0]
-        self.debug_ctr = self.debug_ctr + 1
-        if self.debug_ctr > 1000:
-            #print(self.tx_status)
-            self.debug_ctr = 0
+
 
 
 
         threshold = 11
+        spectrum_sense_threshold = 0.2
 
 #####################################################################
 ### Transmit Status Stuff ( Spectrum Sense, Backoff Implementation)
@@ -63,13 +61,14 @@ class frame_sync(gr.basic_block):
         ninput_items = len(in0)
 
         ## Spectrum is Free
-        if max(in1) < 0.5:
+        if max(in1) < spectrum_sense_threshold:
             if self.tx_check:
                 self.tx_status[2] += -1
                 if self.tx_status[2] == 0:
                     self.tx_check = False
             self.consume(0, ninput_items)
-            self.consume(1, len(in1))
+            self.consume(1, int(len(in1)/8))
+            #self.consume(1, len(in1))
             return 0;
 
         ##Spectrum is Occupied
@@ -81,7 +80,7 @@ class frame_sync(gr.basic_block):
             self.tx_status[3] = backoff
 
 
-        self.consume(1, int(len(in1)/2))
+        self.consume(1, int(len(in1)/8))
 
 
         if(ninput_items > self.min_msg_len): #if buffer is long enough
@@ -91,6 +90,7 @@ class frame_sync(gr.basic_block):
             barkerprecheck = barkerprecheck[::-1]
 
             if (max(barkerprecheck) > threshold): #found a preamble
+                #print("Found a Preamble")
                 start = np.argmax(barkerprecheck)+13 #move to the end of the barker code (start of packet)
 
                 # try to find the end of the packet
@@ -105,9 +105,10 @@ class frame_sync(gr.basic_block):
 
                 if (max(barkerpostcheck) > threshold): #found the end of the packet!
                     pkt_len = np.argmax(barkerpostcheck)
+                    #print("Found backend barker, packet length is: " + str(pkt_len))
 
                     if np.mod(pkt_len,8) == 0: #Yay its a legit packet. pass it on.
-                        if self.ack_check and pkt_len == 8 and sum(in0[start:start+pkt_len]) == 0:
+                        if pkt_len == 8:
                             # received ack
                             self.tx_status[5] = 1
                             self.ack_check = False
@@ -126,6 +127,7 @@ class frame_sync(gr.basic_block):
                         return 0 # dont push anything
 
                 else: # did not find the end of the packet
+                    #print("No backend barker")
                     if potential_failure: # found pre barker without post in searchable range
                         self.consume(0,int(start)-1) #consume the pre barker and look for a new one
                         return 0 # dont push anything
