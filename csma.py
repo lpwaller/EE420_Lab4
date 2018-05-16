@@ -240,7 +240,7 @@ class tdd_mac(object):
 
             #ack received. Reset
             if tx_status[5] == 1:
-                print("received ack")
+                print("\nreceived ack\n")
                 tx_status[0] = 2000
                 tx_status[1] = 0
                 tx_status[2] = 2000
