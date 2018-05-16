@@ -206,6 +206,7 @@ class tdd_mac(object):
     def main_loop(self, tx_status, rx_status):
         print("\n\nType something to send: ")
         user_msg = raw_input()
+        user_msg = user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg
         fill_frame = ""
         for ndx in range((len(user_msg)+4),self.empty_frame_size):
             fill_frame = fill_frame + chr(0)
