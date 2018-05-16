@@ -218,9 +218,11 @@ class tdd_mac(object):
 
 
         ##spam channel initially
+
         print("Occupying Channel with Garbage")
         for spam_it in range(500):
             self.tb.send_pkt(user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg+user_msg)
+
             #time.sleep(0.001) #no sleep, just spam
 
         print("Done Occupying Channel, Entering Main Loop")
@@ -233,6 +235,7 @@ class tdd_mac(object):
             if rx_status[1] == 1:
                 self.tb.send_pkt(self.ack_msg)
                 print("Sending Ack")
+
                 rx_status[1] = 0
 
             #ack received. Reset
